@@ -20,8 +20,6 @@ export const Plot: React.FunctionComponent<IProps> = ({ plotRef }) => {
     const ctx = cnv.getContext('2d') ?? te('context died')
 
     plotRef.current = createPlot({ ctx })
-
-    plotRef.current.draw()
   }, [])
 
   return (
