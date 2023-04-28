@@ -1,15 +1,32 @@
 import { useEffect, useRef } from 'react'
-import { IPlot } from '../types'
+import { IPlot, IProps } from '../types'
 import * as S from './plot.styled'
 import { te } from '../utils'
 import { createPlot } from '../diagram'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectSettings, selectStyle, setCR, setRR } from './store'
 
-interface IProps {
+interface IPlotProps {
   plotRef: React.MutableRefObject<IPlot | null>
 }
 
-export const Plot: React.FunctionComponent<IProps> = ({ plotRef }) => {
+export const Plot: React.FunctionComponent<IPlotProps> = ({ plotRef }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  const dispatch = useDispatch()
+  const style = useSelector(selectStyle)
+  const settings = useSelector(selectSettings)
+
+  const handleResize = ({
+    ctx,
+    props,
+  }: {
+    ctx: CanvasRenderingContext2D
+    props: IProps
+  }) => {
+    dispatch(setCR(`${props.width}x${props.height}`))
+    dispatch(setRR(`${ctx.canvas.width}x${ctx.canvas.height}`))
+  }
 
   useEffect(() => {
     if (plotRef.current) {
@@ -19,7 +36,14 @@ export const Plot: React.FunctionComponent<IProps> = ({ plotRef }) => {
     const cnv = canvasRef.current ?? te('no canvas ref')
     const ctx = cnv.getContext('2d') ?? te('context died')
 
-    plotRef.current = createPlot({ ctx })
+    plotRef.current = createPlot({
+      ctx,
+      cbs: {
+        resize: handleResize,
+      },
+      settings,
+      style,
+    })
   }, [])
 
   return (

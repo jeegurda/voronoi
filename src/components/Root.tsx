@@ -4,6 +4,8 @@ import * as S from './root.styled'
 import { IPlot } from '../types'
 import { UI } from './UI'
 import { te } from '../utils'
+import { Provider, useSelector } from 'react-redux'
+import { selectCR, store } from './store'
 
 export const Root = () => {
   const plotRef = useRef<IPlot | null>(null)
@@ -18,12 +20,14 @@ export const Root = () => {
   }, [])
 
   return (
-    <S.Root>
-      <S.Global />
-      <S.Container>
-        <Plot plotRef={plotRef} />
-        <UI />
-      </S.Container>
-    </S.Root>
+    <Provider store={store}>
+      <S.Root>
+        <S.Global />
+        <S.Container>
+          <Plot plotRef={plotRef} />
+          <UI plotRef={plotRef} />
+        </S.Container>
+      </S.Root>
+    </Provider>
   )
 }
