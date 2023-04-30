@@ -6,12 +6,12 @@ export const initialState: IMainState = {
   renderRes: '-',
   style: {
     dTriangulation: {
-      display: true,
+      display: false,
       width: 0.5,
       color: '#00ff00',
     },
     dCircumcircles: {
-      display: true,
+      display: false,
       width: 0.5,
       color: '#ff0000',
     },
@@ -26,7 +26,7 @@ export const initialState: IMainState = {
       color: '#ffffff',
     },
     vBounds: {
-      display: false,
+      display: true,
     },
     vFill: {
       display: true,
