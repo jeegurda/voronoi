@@ -18,3 +18,9 @@ export const Title = styled.div`
 export const Section = styled.div`
   margin-bottom: 5px;
 `
+
+export const FileInput = styled.input`
+  visibility: hidden;
+  position: absolute;
+  z-index: -1;
+`

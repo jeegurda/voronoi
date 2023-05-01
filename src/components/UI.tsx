@@ -11,7 +11,7 @@ import {
 import { IMainState, IPlot } from '../types'
 import * as React from 'react'
 import { te } from '../utils'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 const stylesList: {
   title: string
@@ -71,6 +71,14 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
     plot.draw()
   }, [settings])
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleInputButton = () => {
+    const fileInput = fileInputRef.current ?? te('File input ref empty')
+
+    fileInput.click()
+  }
+
   return (
     <S.Container>
       <S.Block>
@@ -111,7 +119,8 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
           />
         </S.Section>
         <div>
-          <button>Load from image</button>
+          <S.FileInput ref={fileInputRef} type="file" accept="image/*" />
+          <button onClick={handleInputButton}>Load from image</button>
         </div>
       </S.Block>
     </S.Container>
