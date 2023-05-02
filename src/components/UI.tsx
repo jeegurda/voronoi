@@ -131,6 +131,26 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
     [],
   )
 
+  const handleUpload = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const files = evt.target.files ?? te('No files')
+    const [file] = files
+    const fr = new FileReader()
+
+    fr.addEventListener('load', (ev) => {
+      const result = fr.result
+
+      if (typeof result !== 'string') {
+        te('Error reading as base64')
+      }
+
+      const img = new Image()
+
+      img.src = result
+      document.body.append(img)
+    })
+    fr.readAsDataURL(file)
+  }
+
   return (
     <S.Container>
       <S.Block>
@@ -177,7 +197,12 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
           </span>
         </S.Section>
         <S.Section>
-          <S.FileInput ref={fileInputRef} type="file" accept="image/*" />
+          <S.FileInput
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleUpload}
+          />
           <button onClick={handleInputButton}>Load from image</button>
         </S.Section>
         <S.Section>
