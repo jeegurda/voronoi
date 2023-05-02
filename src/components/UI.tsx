@@ -8,10 +8,18 @@ import {
   setSettings,
   setStyle,
 } from './store'
-import { IMainState, IPlot } from '../types'
+import { IMainState, IPlot, RootState } from '../types'
 import * as React from 'react'
 import { te } from '../utils'
-import { useEffect, useRef } from 'react'
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { isAssertClause } from 'typescript'
 
 const stylesList: {
   title: string
@@ -33,16 +41,16 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
   const cr = useSelector(selectCR)
   const rr = useSelector(selectRR)
   const style = useSelector(selectStyle)
+
   const settings = useSelector(selectSettings)
+  const [displaySettings, setDisplaySettings] = useState<{
+    [key in keyof RootState['settings']]: string
+  }>(() => ({
+    generateAmount: String(settings.generateAmount),
+    margin: String(settings.margin),
+  }))
 
   const dispatch = useDispatch()
-
-  const handleChange = (
-    prop: keyof IMainState['style'],
-    evt: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    dispatch(setStyle({ prop, style: { display: evt.target.checked } }))
-  }
 
   useEffect(() => {
     const plot = plotRef.current ?? te('Ref is null')
@@ -51,25 +59,37 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
     plot.draw()
   }, [style])
 
-  const handleRandomize = () => {
-    const plot = plotRef.current ?? te('Ref is null')
-
-    plot.randomize()
-    plot.draw()
-  }
-
-  const handleGenerateChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(evt.target.value)
-
-    dispatch(setSettings({ generateAmount: value }))
-  }
-
   useEffect(() => {
     const plot = plotRef.current ?? te('Ref is null')
 
     plot.updateSettings(settings)
     plot.draw()
   }, [settings])
+
+  const handleStyleCheckboxChange = (
+    prop: keyof IMainState['style'],
+    evt: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    dispatch(setStyle({ prop, style: { display: evt.target.checked } }))
+  }
+
+  const handleGenerateClick = () => {
+    const plot = plotRef.current ?? te('Ref is null')
+
+    plot.randomize()
+    plot.draw()
+  }
+
+  const handleGenerateInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    if (evt.target.validity.valid) {
+      dispatch(setSettings({ generateAmount: evt.target.valueAsNumber }))
+    }
+
+    setDisplaySettings(({ generateAmount, ...rest }) => ({
+      ...rest,
+      generateAmount: evt.target.value,
+    }))
+  }
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -78,6 +98,38 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
 
     fileInput.click()
   }
+
+  const handleMarginInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    if (evt.target.validity.valid) {
+      dispatch(setSettings({ margin: evt.target.valueAsNumber }))
+    }
+
+    setDisplaySettings(({ margin, ...rest }) => ({
+      ...rest,
+      margin: evt.target.value,
+    }))
+  }
+
+  const inputRefs: {
+    [key in keyof RootState['settings']]: MutableRefObject<HTMLInputElement | null>
+  } = {
+    generateAmount: useRef<HTMLInputElement>(null),
+    margin: useRef<HTMLInputElement>(null),
+  }
+
+  const isOutOfBounds = useCallback(
+    (prop: keyof RootState['settings']): boolean => {
+      const ref = inputRefs[prop].current
+
+      if (!ref) {
+        // Refs not mounted yet
+        return false
+      }
+
+      return !ref.validity.valid
+    },
+    [],
+  )
 
   return (
     <S.Container>
@@ -96,7 +148,7 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
                 <input
                   type="checkbox"
                   checked={checked}
-                  onChange={(e) => handleChange(prop, e)}
+                  onChange={(e) => handleStyleCheckboxChange(prop, e)}
                   disabled={disabled}
                 />
                 <span>{title}</span>
@@ -107,21 +159,42 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
       </S.Block>
       <S.Block>
         <S.Title>Voronoi diagram points:</S.Title>
-
         <S.Section>
-          <button onClick={handleRandomize}>Generate</button>
+          <button onClick={handleGenerateClick}>Generate</button>
           <input
             type="number"
             min="1"
             max="100000"
-            value={settings.generateAmount}
-            onChange={handleGenerateChange}
+            value={displaySettings.generateAmount}
+            onInput={handleGenerateInput}
+            required
+            ref={inputRefs.generateAmount}
           />
+          <span>
+            {isOutOfBounds('generateAmount') && (
+              <span title="Out of bounds">⚠️</span>
+            )}
+          </span>
         </S.Section>
-        <div>
+        <S.Section>
           <S.FileInput ref={fileInputRef} type="file" accept="image/*" />
           <button onClick={handleInputButton}>Load from image</button>
-        </div>
+        </S.Section>
+        <S.Section>
+          <span>Margin: </span>
+          <input
+            type="number"
+            min="0"
+            max="1000"
+            onInput={handleMarginInput}
+            value={displaySettings.margin}
+            required
+            ref={inputRefs.margin}
+          />
+          <span>
+            {isOutOfBounds('margin') && <span title="Out of bounds">⚠️</span>}
+          </span>
+        </S.Section>
       </S.Block>
     </S.Container>
   )

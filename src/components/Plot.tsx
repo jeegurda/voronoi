@@ -41,8 +41,8 @@ export const Plot: React.FunctionComponent<IPlotProps> = ({ plotRef }) => {
       cbs: {
         resize: handleResize,
       },
-      settings,
-      style,
+      initialSettings: settings,
+      initialStyle: style,
     })
   }, [])
 

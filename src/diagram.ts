@@ -1,3 +1,4 @@
+import { VoidExpression } from 'typescript'
 import { IMainState, IPlot, IProps, RootState, TCallbacks } from './types'
 import { rnd } from './utils'
 import { Delaunay } from 'd3-delaunay'
@@ -174,16 +175,29 @@ const _setSize = ({
   ctx.scale(dpr, dpr)
 }
 
+const _randomize = ({
+  props,
+  settings,
+}: {
+  props: IProps
+  settings: IMainState['settings']
+}) => {
+  props.pts = Array.from(new Array(settings.generateAmount), (_el, _idx) => [
+    rnd(settings.margin, props.width - settings.margin),
+    rnd(settings.margin, props.height - settings.margin),
+  ])
+}
+
 const createPlot = ({
   ctx,
   cbs = {},
-  style,
-  settings,
+  initialStyle,
+  initialSettings,
 }: {
   ctx: CanvasRenderingContext2D
   cbs: TCallbacks
-  style: IMainState['style']
-  settings: IMainState['settings']
+  initialStyle: IMainState['style']
+  initialSettings: IMainState['settings']
 }): IPlot => {
   const props: IProps = {
     width: 0,
@@ -191,8 +205,8 @@ const createPlot = ({
     pts: [],
   }
 
-  let savedStyle = Object.assign({}, style)
-  let savedSettings = Object.assign({}, settings)
+  const style = Object.assign({}, initialStyle)
+  const settings = Object.assign({}, initialSettings)
 
   const handleResize = () => {
     setSize()
@@ -203,35 +217,29 @@ const createPlot = ({
   const setSize = _setSize.bind(null, { ctx, props })
   const destroy = _destroy.bind(null, { ctx, props, handleResize })
   const init = _init.bind(null, { props, handleResize, setSize, cbs, ctx })
-  const updateStyle = (style: IMainState['style'] = savedStyle) => {
-    savedStyle = Object.assign({}, style)
+  const updateStyle = (newStyle: IMainState['style']) => {
+    Object.assign(style, newStyle)
   }
-  const updateSettings = (settings: IMainState['settings'] = savedSettings) => {
-    if (settings.generateAmount < props.pts.length) {
+  const updateSettings = (newSettings: IMainState['settings']) => {
+    if (newSettings.generateAmount < props.pts.length) {
       props.pts.splice(
-        settings.generateAmount,
-        props.pts.length - settings.generateAmount,
+        newSettings.generateAmount,
+        props.pts.length - newSettings.generateAmount,
       )
-    } else if (settings.generateAmount > props.pts.length) {
-      for (let i = props.pts.length; i < settings.generateAmount; i++) {
+    } else if (newSettings.generateAmount > props.pts.length) {
+      for (let i = props.pts.length; i < newSettings.generateAmount; i++) {
         props.pts.push([
-          rnd(settings.margin, props.width - settings.margin * 2),
-          rnd(settings.margin, props.height - settings.margin * 2),
+          rnd(newSettings.margin, props.width - newSettings.margin),
+          rnd(newSettings.margin, props.height - newSettings.margin),
         ])
       }
     }
-    savedSettings = Object.assign({}, settings)
+    Object.assign(settings, newSettings)
   }
-  const draw = () => _draw({ ctx, props, style: savedStyle })
+  const draw = () => _draw({ ctx, props, style })
+  const randomize = () => _randomize({ settings, props })
 
   init()
-
-  const randomize = () => {
-    props.pts = Array.from(new Array(settings.generateAmount), (_el, idx) => [
-      rnd(settings.margin, props.width - settings.margin * 2),
-      rnd(settings.margin, props.height - settings.margin * 2),
-    ])
-  }
 
   randomize()
   draw()
