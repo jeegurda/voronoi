@@ -131,12 +131,17 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
     [],
   )
 
-  const handleUpload = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const files = evt.target.files ?? te('No files')
+  const [reading, setReading] = useState(false)
+
+  const handleFileInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const input = evt.target
+    const files = input.files ?? te('No files')
+
+    setReading(true)
     const [file] = files
     const fr = new FileReader()
 
-    fr.addEventListener('load', (ev) => {
+    fr.addEventListener('load', () => {
       const result = fr.result
 
       if (typeof result !== 'string') {
@@ -145,8 +150,16 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
 
       const img = new Image()
 
+      img.addEventListener('load', async () => {
+        const bitmap = await createImageBitmap(img)
+        const plot = plotRef.current ?? te('Plot ref is null')
+
+        plot.drawFromBitmap(bitmap)
+
+        input.value = ''
+        setReading(false)
+      })
       img.src = result
-      document.body.append(img)
     })
     fr.readAsDataURL(file)
   }
@@ -201,9 +214,11 @@ export const UI: React.FunctionComponent<IUIProps> = ({ plotRef }) => {
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            onChange={handleUpload}
+            onChange={handleFileInput}
           />
-          <button onClick={handleInputButton}>Load from image</button>
+          {/* <button onClick={handleInputButton} disabled={reading}>
+            {reading ? 'Reading...' : 'Read from image'}
+          </button> */}
         </S.Section>
         <S.Section>
           <span>Margin: </span>

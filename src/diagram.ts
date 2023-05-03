@@ -139,8 +139,6 @@ const _init = ({
   window.addEventListener('resize', handleResize)
 
   cbs.resize && cbs.resize({ ctx, props })
-
-  console.log('Initialized with w/h %o/%o', props.width, props.height)
 }
 
 const _destroy = ({
@@ -186,6 +184,20 @@ const _randomize = ({
     rnd(settings.margin, props.width - settings.margin),
     rnd(settings.margin, props.height - settings.margin),
   ])
+}
+
+const _drawFromBitmap = ({
+  bitmap,
+  ctx,
+}: {
+  bitmap: ImageBitmap
+  ctx: CanvasRenderingContext2D
+}) => {
+  const ratio = bitmap.width / bitmap.height
+
+  // ctx.createImageData(bitmap)
+
+  bitmap.close()
 }
 
 const createPlot = ({
@@ -239,6 +251,9 @@ const createPlot = ({
   const draw = () => _draw({ ctx, props, style })
   const randomize = () => _randomize({ settings, props })
 
+  const drawFromBitmap = (bitmap: ImageBitmap) =>
+    _drawFromBitmap({ bitmap, ctx })
+
   init()
 
   randomize()
@@ -247,9 +262,12 @@ const createPlot = ({
   return {
     draw,
     destroy,
+    randomize,
+
     updateSettings,
     updateStyle,
-    randomize,
+
+    drawFromBitmap,
   }
 }
 

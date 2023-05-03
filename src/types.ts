@@ -3,9 +3,12 @@ import { store } from './components/store'
 export interface IPlot {
   draw: () => void
   destroy: () => void
+  randomize: () => void
+
   updateStyle: (style: IMainState['style']) => void
   updateSettings: (settings: IMainState['settings']) => void
-  randomize: () => void
+
+  drawFromBitmap: (bitmap: ImageBitmap) => void
 }
 
 type Point = [number, number]

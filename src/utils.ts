@@ -1,4 +1,4 @@
-export const te = (msg: string): never => {
+export const te: (msg: string) => never = (msg) => {
   throw new Error(msg)
 }
 
