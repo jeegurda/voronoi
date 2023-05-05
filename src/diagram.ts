@@ -1,7 +1,8 @@
 import { VoidExpression } from 'typescript'
 import { IMainState, IPlot, IProps, RootState, TCallbacks } from './types'
-import { rnd } from './utils'
+import { rnd, te } from './utils'
 import { Delaunay } from 'd3-delaunay'
+import { deltaE, rgb2lab } from './color'
 
 /** Generate once for the session */
 const hueSet = (() => Array.from(Array(300), () => rnd(0, 256)))()
@@ -189,13 +190,64 @@ const _randomize = ({
 const _drawFromBitmap = ({
   bitmap,
   ctx,
+  props,
 }: {
   bitmap: ImageBitmap
   ctx: CanvasRenderingContext2D
+  props: IProps
 }) => {
   const ratio = bitmap.width / bitmap.height
 
-  // ctx.createImageData(bitmap)
+  const offscreen = new OffscreenCanvas(bitmap.width, bitmap.height)
+  const osCtx = offscreen.getContext('2d') ?? te('Ctx died')
+
+  osCtx.drawImage(bitmap, 0, 0)
+  const imgData = osCtx.getImageData(0, 0, bitmap.width, bitmap.height, {
+    colorSpace: 'srgb',
+  })
+
+  const topLeft = new Uint8ClampedArray([
+    imgData.data[0],
+    imgData.data[1],
+    imgData.data[2],
+    imgData.data[3],
+  ])
+
+  const outImageData = ctx.createImageData(bitmap.width, bitmap.height, {
+    colorSpace: 'srgb',
+  })
+
+  const outArr = outImageData.data
+
+  // const colored = []
+
+  // WIP: working with 3 channels only!
+  const topLeftLab = rgb2lab(topLeft.slice(0, 3))
+  // Delta E tolerance
+  const tolerance = 10
+
+  for (let i = 0; i < imgData.data.length; i += 4) {
+    const lab = rgb2lab(imgData.data.slice(i, i + 3))
+    const distToBg = deltaE(topLeftLab, lab)
+
+    if (distToBg < tolerance) {
+      outArr[i] = 255
+      outArr[i + 1] = 0
+      outArr[i + 2] = 255
+      outArr[i + 3] = 255
+    } else {
+      // colored.push(new Uint8ClampedArray(imgData.data.slice(i, i + 4)))
+      outArr[i] = imgData.data[i]
+      outArr[i + 1] = imgData.data[i + 1]
+      outArr[i + 2] = imgData.data[i + 2]
+      outArr[i + 3] = 255
+    }
+  }
+
+  ctx.clearRect(0, 0, props.width, props.height)
+  ctx.putImageData(outImageData, 0, 0)
+
+  // console.log(colored)
 
   bitmap.close()
 }
@@ -252,7 +304,7 @@ const createPlot = ({
   const randomize = () => _randomize({ settings, props })
 
   const drawFromBitmap = (bitmap: ImageBitmap) =>
-    _drawFromBitmap({ bitmap, ctx })
+    _drawFromBitmap({ bitmap, ctx, props })
 
   init()
 
