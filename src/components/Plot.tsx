@@ -5,6 +5,7 @@ import { te } from '../utils'
 import { createPlot } from '../diagram'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectSettings, selectStyle, setCR, setRR } from './store'
+import { UI } from './UI'
 
 interface IPlotProps {
   plotRef: React.MutableRefObject<IPlot | null>
@@ -49,6 +50,7 @@ export const Plot: React.FunctionComponent<IPlotProps> = ({ plotRef }) => {
   return (
     <S.Container>
       <canvas ref={canvasRef}>plot</canvas>
+      <UI plotRef={plotRef} />
     </S.Container>
   )
 }

@@ -2,10 +2,10 @@ import { useEffect, useRef } from 'react'
 import { Plot } from './Plot'
 import * as S from './root.styled'
 import { IPlot } from '../types'
-import { UI } from './UI'
+import { Controls } from './Controls'
 import { te } from '../utils'
-import { Provider, useSelector } from 'react-redux'
-import { selectCR, store } from './store'
+import { Provider } from 'react-redux'
+import { store } from './store'
 
 export const Root = () => {
   const plotRef = useRef<IPlot | null>(null)
@@ -25,7 +25,7 @@ export const Root = () => {
         <S.Global />
         <S.Container>
           <Plot plotRef={plotRef} />
-          <UI plotRef={plotRef} />
+          <Controls plotRef={plotRef} />
         </S.Container>
       </S.Root>
     </Provider>

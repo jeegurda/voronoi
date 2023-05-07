@@ -11,7 +11,7 @@ export interface IPlot {
   drawFromBitmap: (bitmap: ImageBitmap) => void
 }
 
-type Point = [number, number]
+export type Point = [number, number]
 
 export interface IProps {
   width: number
