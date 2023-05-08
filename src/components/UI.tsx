@@ -18,7 +18,6 @@ const UI = ({ plotRef }: IUIProps) => {
     const plot = plotRef.current
     if (plot === null) {
       // Not initialized yet
-      console.log('initial?')
       return
     }
 
