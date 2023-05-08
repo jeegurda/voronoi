@@ -4,7 +4,13 @@ import * as S from './plot.styled'
 import { te } from '../utils'
 import { createPlot } from '../diagram'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectSettings, selectStyle, setCR, setRR } from './store'
+import {
+  selectSettings,
+  selectStyle,
+  setCR,
+  setRR,
+  updateRedrawUi,
+} from './store'
 import { UI } from './UI'
 
 interface IPlotProps {
@@ -29,6 +35,10 @@ export const Plot: React.FunctionComponent<IPlotProps> = ({ plotRef }) => {
     dispatch(setRR(`${ctx.canvas.width}x${ctx.canvas.height}`))
   }
 
+  const handleUpdateUi = ({ props }: { props: IProps }) => {
+    dispatch(updateRedrawUi)
+  }
+
   useEffect(() => {
     if (plotRef.current) {
       console.warn('Plot already created')
@@ -41,6 +51,7 @@ export const Plot: React.FunctionComponent<IPlotProps> = ({ plotRef }) => {
       ctx,
       cbs: {
         resize: handleResize,
+        updateUi: handleUpdateUi,
       },
       initialSettings: settings,
       initialStyle: style,

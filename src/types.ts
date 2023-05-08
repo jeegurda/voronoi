@@ -9,6 +9,8 @@ export interface IPlot {
   updateSettings: (settings: IMainState['settings']) => void
 
   drawFromBitmap: (bitmap: ImageBitmap) => void
+
+  props: IProps
 }
 
 export type Point = [number, number]
@@ -43,6 +45,7 @@ export interface IMainState {
     vBounds: Pick<IRenderStyle, 'display'>
     vFill: Pick<IRenderStyle, 'display'>
   }
+  redrawUi: number
 }
 
 export type TCallbacks = {
@@ -53,4 +56,5 @@ export type TCallbacks = {
     ctx: CanvasRenderingContext2D
     props: IProps
   }) => void
+  updateUi?: ({ props }: { props: IProps }) => void
 }

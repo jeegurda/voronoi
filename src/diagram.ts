@@ -300,7 +300,10 @@ const createPlot = ({
     }
     Object.assign(settings, newSettings)
   }
-  const draw = () => _draw({ ctx, props, style })
+  const draw = () => {
+    _draw({ ctx, props, style })
+    cbs.updateUi && cbs.updateUi({ props })
+  }
   const randomize = () => _randomize({ settings, props })
 
   const drawFromBitmap = (bitmap: ImageBitmap) =>
@@ -320,6 +323,8 @@ const createPlot = ({
     updateStyle,
 
     drawFromBitmap,
+
+    props,
   }
 }
 
