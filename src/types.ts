@@ -45,6 +45,9 @@ export interface IMainState {
     vBounds: Pick<IRenderStyle, 'display'>
     vFill: Pick<IRenderStyle, 'display'>
   }
+  ui: {
+    display: boolean
+  }
   redrawUi: number
 }
 

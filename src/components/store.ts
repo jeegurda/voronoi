@@ -32,6 +32,9 @@ export const initialState: IMainState = {
       display: true,
     },
   },
+  ui: {
+    display: true,
+  },
   settings: {
     margin: 20,
     generateAmount: 500,
@@ -64,19 +67,23 @@ export const mainSlice = createSlice({
     ) => {
       Object.assign(state.settings, action.payload)
     },
+    setUi: (state, action: PayloadAction<Partial<IMainState['ui']>>) => {
+      Object.assign(state.settings, action.payload)
+    },
     updateRedrawUi: (state) => {
       state.redrawUi++
     },
   },
 })
 
-export const { setCR, setRR, setStyle, setSettings, updateRedrawUi } =
+export const { setCR, setRR, setStyle, setSettings, updateRedrawUi, setUi } =
   mainSlice.actions
 
 export const selectCR = (state: RootState) => state.canvasRes
 export const selectRR = (state: RootState) => state.renderRes
 export const selectStyle = (state: RootState) => state.style
 export const selectSettings = (state: RootState) => state.settings
+export const selectUi = (state: RootState) => state.ui
 export const selectRedrawUi = (state: RootState) => state.settings
 
 export const store = configureStore({

@@ -16,3 +16,22 @@ export const Point = styled.span`
   width: 0;
   height: 0;
 `
+
+export const Inner = styled.span`
+  width: 16px;
+  height: 16px;
+  left: -8px;
+  top: -8px;
+  position: absolute;
+  cursor: grab;
+`
+
+export const Index = styled.span`
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, 20px);
+  white-space: nowrap;
+  font-size: 14px;
+  text-shadow: 0px 1px 3px rgba(0, 0, 0, 1);
+`

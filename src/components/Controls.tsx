@@ -5,8 +5,10 @@ import {
   selectRR,
   selectSettings,
   selectStyle,
+  selectUi,
   setSettings,
   setStyle,
+  setUi,
 } from './store'
 import { IMainState, IPlot, RootState } from '../types'
 import * as React from 'react'
@@ -41,6 +43,7 @@ export const Controls: React.FunctionComponent<IControlsProps> = ({
   const cr = useSelector(selectCR)
   const rr = useSelector(selectRR)
   const style = useSelector(selectStyle)
+  const ui = useSelector(selectUi)
 
   const settings = useSelector(selectSettings)
   const [displaySettings, setDisplaySettings] = useState<{
@@ -189,6 +192,18 @@ export const Controls: React.FunctionComponent<IControlsProps> = ({
             </S.Section>
           )
         })}
+      </S.Block>
+      <S.Block>
+        <S.Section>
+          <label>
+            <input
+              type="checkbox"
+              checked={ui.display}
+              onChange={(e) => dispatch(setUi({ display: e.target.checked }))}
+            />
+            <span>Render UI</span>
+          </label>
+        </S.Section>
       </S.Block>
       <S.Block>
         <S.Title>Voronoi diagram points:</S.Title>
