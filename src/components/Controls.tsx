@@ -12,7 +12,7 @@ import {
 } from './store'
 import { IMainState, IPlot, RootState } from '../types'
 import * as React from 'react'
-import { te } from '../utils'
+import { getPlot, te } from '../utils'
 import {
   MutableRefObject,
   useCallback,
@@ -40,30 +40,39 @@ interface IControlsProps {
 export const Controls: React.FunctionComponent<IControlsProps> = ({
   plotRef,
 }) => {
+  const dispatch = useDispatch()
+
   const cr = useSelector(selectCR)
   const rr = useSelector(selectRR)
-  const style = useSelector(selectStyle)
   const ui = useSelector(selectUi)
-
+  const style = useSelector(selectStyle)
   const settings = useSelector(selectSettings)
+
   const [displaySettings, setDisplaySettings] = useState<{
     [key in keyof RootState['settings']]: string
   }>(() => ({
     generateAmount: String(settings.generateAmount),
     margin: String(settings.margin),
   }))
+  const [reading, setReading] = useState(false)
 
-  const dispatch = useDispatch()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const inputRefs: {
+    [key in keyof RootState['settings']]: MutableRefObject<HTMLInputElement | null>
+  } = {
+    generateAmount: useRef<HTMLInputElement>(null),
+    margin: useRef<HTMLInputElement>(null),
+  }
 
   useEffect(() => {
-    const plot = plotRef.current ?? te('Ref is null')
+    const plot = getPlot(plotRef)
 
     plot.updateStyle(style)
     plot.draw()
   }, [style])
 
   useEffect(() => {
-    const plot = plotRef.current ?? te('Ref is null')
+    const plot = getPlot(plotRef)
 
     plot.updateSettings(settings)
     plot.draw()
@@ -77,7 +86,7 @@ export const Controls: React.FunctionComponent<IControlsProps> = ({
   }
 
   const handleGenerateClick = () => {
-    const plot = plotRef.current ?? te('Ref is null')
+    const plot = getPlot(plotRef)
 
     plot.randomize()
     plot.draw()
@@ -93,8 +102,6 @@ export const Controls: React.FunctionComponent<IControlsProps> = ({
       generateAmount: evt.target.value,
     }))
   }
-
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleInputButton = () => {
     const fileInput = fileInputRef.current ?? te('File input ref empty')
@@ -112,29 +119,6 @@ export const Controls: React.FunctionComponent<IControlsProps> = ({
       margin: evt.target.value,
     }))
   }
-
-  const inputRefs: {
-    [key in keyof RootState['settings']]: MutableRefObject<HTMLInputElement | null>
-  } = {
-    generateAmount: useRef<HTMLInputElement>(null),
-    margin: useRef<HTMLInputElement>(null),
-  }
-
-  const isOutOfBounds = useCallback(
-    (prop: keyof RootState['settings']): boolean => {
-      const ref = inputRefs[prop].current
-
-      if (!ref) {
-        // Refs not mounted yet
-        return false
-      }
-
-      return !ref.validity.valid
-    },
-    [],
-  )
-
-  const [reading, setReading] = useState(false)
 
   const handleFileInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const input = evt.target
@@ -155,7 +139,7 @@ export const Controls: React.FunctionComponent<IControlsProps> = ({
 
       img.addEventListener('load', async () => {
         const bitmap = await createImageBitmap(img)
-        const plot = plotRef.current ?? te('Plot ref is null')
+        const plot = getPlot(plotRef)
 
         plot.drawFromBitmap(bitmap)
 
@@ -166,6 +150,20 @@ export const Controls: React.FunctionComponent<IControlsProps> = ({
     })
     fr.readAsDataURL(file)
   }
+
+  const isOutOfBounds = useCallback(
+    (prop: keyof RootState['settings']): boolean => {
+      const ref = inputRefs[prop].current
+
+      if (!ref) {
+        // Refs not mounted yet
+        return false
+      }
+
+      return !ref.validity.valid
+    },
+    [],
+  )
 
   return (
     <S.Container>

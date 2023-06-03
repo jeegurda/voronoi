@@ -1,3 +1,4 @@
+import { MutableRefObject } from 'react'
 import { store } from './components/store'
 
 export interface IPlot {

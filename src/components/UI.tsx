@@ -4,6 +4,7 @@ import * as S from './ui.styled'
 import { te } from '../utils'
 import { useSelector } from 'react-redux'
 import { selectUi, updateRedrawUi } from './store'
+import { UI_PTS_LIMIT } from '../params'
 
 interface IUIProps {
   plotRef: React.MutableRefObject<IPlot | null>
@@ -31,13 +32,15 @@ const UI = ({ plotRef }: IUIProps) => {
     setHovered(idx)
   }
 
-  const handleLeave = (idx: number) => {
+  const handleLeave = () => {
     setHovered(null)
   }
 
+  const shouldRender = ui.display && localPts.length < UI_PTS_LIMIT
+
   return (
     <S.Container>
-      {ui.display &&
+      {shouldRender &&
         localPts.map(([x, y], idx) => (
           <S.Point
             key={idx}
@@ -45,7 +48,7 @@ const UI = ({ plotRef }: IUIProps) => {
               transform: `translate(${x}px, ${y}px)`,
             }}
             onMouseEnter={() => handleEnter(idx)}
-            onMouseLeave={() => handleLeave(idx)}
+            onMouseLeave={() => handleLeave()}
           >
             <S.Inner>
               {hovered === idx && <S.Index>{`${x},${y} (${idx})`}</S.Index>}

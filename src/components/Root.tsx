@@ -3,7 +3,7 @@ import { Plot } from './Plot'
 import * as S from './root.styled'
 import { IPlot } from '../types'
 import { Controls } from './Controls'
-import { te } from '../utils'
+import { getPlot } from '../utils'
 import { Provider } from 'react-redux'
 import { store } from './store'
 
@@ -12,7 +12,7 @@ export const Root = () => {
 
   useEffect(() => {
     return () => {
-      const plot = plotRef.current ?? te('Ref is empty')
+      const plot = getPlot(plotRef)
 
       plot.destroy()
       plotRef.current = null

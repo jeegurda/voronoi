@@ -68,7 +68,7 @@ export const mainSlice = createSlice({
       Object.assign(state.settings, action.payload)
     },
     setUi: (state, action: PayloadAction<Partial<IMainState['ui']>>) => {
-      Object.assign(state.settings, action.payload)
+      Object.assign(state.ui, action.payload)
     },
     updateRedrawUi: (state) => {
       state.redrawUi++
